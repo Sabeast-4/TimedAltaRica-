@@ -1,0 +1,52 @@
+domain triplet {notActive, Active, Failed}
+
+class Delayed_AGENT
+    triplet s (init = notActive);
+    Boolean I (reset = false);
+    Boolean O (reset = false);
+
+    Boolean countStarts (init = false);
+    Boolean SingleAct (init = false);
+
+    event timed (delay = Dirac(0));
+    event del (delay = Dirac(0));
+
+    Integer t (reset = 0); // Absolute time clock
+    Integer tg (init = 0); // Time of guard activation
+    parameter Integer Delay = 1;  // Absolute-time  delay
+
+	event failure (delay = exponential(0.5));
+
+transition
+	failure : not s == Failed -> s := Failed;
+
+    timed : I and not countStarts and not s == Failed -> {countStarts := true; tg := t;}
+
+    del : countStarts and s == notActive and t == tg + Delay -> s := Active;
+
+assertion
+    O := if s == Active then I else false;
+end
+
+class DelayedComp1
+    Boolean s (init = true);
+    Boolean I (reset = false);
+    Boolean O (reset = false);
+
+    Boolean countStarts (init = false);
+
+    event request (delay = Dirac(1));
+
+    parameter Integer Delay = 1;  // Absolute-time  delay
+
+	event failure (delay = exponential(0.5));
+	Integer t (reset = 0);
+
+transition
+	failure : not s == Failed -> s := false;
+
+    request : I and not s == Failed and not countStarts -> countStarts := true;
+
+assertion
+    O := if s == true and countStarts == true then I else false;
+end

@@ -1,0 +1,51 @@
+class AGENT
+    	Boolean s (init = true);
+	Boolean I, O (reset = false);
+
+	parameter Real Lambda=3e-9;
+	event fail (delay=exponential(Lambda));
+
+transition
+	fail : s == true -> s := false;
+
+assertion
+	O := if s == true then I
+		else false;
+end
+
+class SWITCH
+	Boolean I1, I2 (reset = true);
+	Boolean O (reset = true);
+	Boolean StuckCondition (reset = false);
+
+	Boolean select1 (init = true);
+	Boolean stuck (init = false);
+	
+	event select_latched (delay = Dirac(0));
+	event select2 (delay = Dirac(0));
+
+	transition
+	select_latched : not stuck and StuckCondition -> stuck := true;
+	select2 : not stuck and not I1 and select1 -> select1 := false;
+	assertion
+	
+	O := if select1 then I1 else I2;
+end
+
+class TIME_MONITOR
+	Boolean StuckCondition (reset = false);
+	Boolean timeRunning (init = true);	
+	Integer t (init = 0);
+
+	event Tick (delay = 1);
+	event freeze (delay = Dirac(0));
+	
+	transition
+	Tick : true -> t := t + 1;
+	freeze : t >= 2 and timeRunning -> timeRunning := false;
+
+	assertion
+	StuckCondition := if timeRunning then false else true;
+end
+
+

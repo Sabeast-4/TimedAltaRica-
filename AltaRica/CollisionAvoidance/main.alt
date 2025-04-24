@@ -1,0 +1,31 @@
+block AirCollisionAvoidance
+	INTRUDER IntruderProximity;
+	UAS_dynamic uas;
+
+	observer Boolean TimedCollisionAvoided = (uas.AirCl_Performance == true and t == 4);
+
+
+	// Clock modellization
+	Integer t (init = 0);
+	event Tick (delay = 1);
+
+transition
+	Tick : true -> t := t + 1;
+
+assertion
+	uas.t := t;
+
+	uas.AirCl_Detection := IntruderProximity.O ;	
+end
+
+class INTRUDER
+	Boolean s (init = false);
+	Boolean O (reset = false);
+	event Trigger (delay= Dirac(0));
+
+transition
+	Trigger : s == false -> s := true;
+
+assertion
+	O := if s == true then true else false;
+end

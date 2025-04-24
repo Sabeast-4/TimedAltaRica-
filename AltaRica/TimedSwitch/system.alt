@@ -1,0 +1,34 @@
+class DroneCommunication
+	AGENT transmit;
+	AGENT pic_engage;
+	
+	Boolean O (reset = true);
+
+	observer Boolean FailedCommunication = (O == false);
+
+	assertion
+	transmit.I := true;
+	pic_engage.I := transmit. O;
+	O := pic_engage.O;
+end
+
+
+block TimedSwitch
+	AGENT c1;
+	AGENT c2;
+	TIME_MONITOR tm;
+	SWITCH s;
+	
+	Boolean O (reset = true);	
+
+	observer Boolean FailedTransmission = (O == false);
+	assertion
+	c1.I := true;
+	c2.I := true;
+	s.I1 := c1.O;
+	s.I2 := c2.O;
+	s.StuckCondition := tm.StuckCondition;
+	
+	O := s.O;
+end
+

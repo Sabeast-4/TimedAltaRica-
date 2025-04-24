@@ -1,0 +1,34 @@
+class UAS_dynamic
+Delayed_AGENT  detect;
+Delayed_AGENT transmit, pic_engage;
+Delayed_AGENT  uav_engage (Delay = 3);
+PriorityTimedSwitch sel; //timed decision logic
+
+Boolean AirCl_Detection(reset = false);
+Boolean AirCl_Performance (reset = false);
+
+Integer t (reset = 0);
+
+assertion
+detect.t := t;
+transmit.t := t;
+uav_engage.t := t;
+pic_engage.t := t;
+sel.t := t;
+
+detect.I := AirCl_Detection;
+
+uav_engage.I := detect.O;
+transmit.I := detect.O;
+sel.guard := detect.O; 
+
+pic_engage.I := transmit.O;
+
+sel.I1 := pic_engage.O;
+sel.I2 := uav_engage.O;
+
+AirCl_Performance := sel.O;
+
+end
+
+

@@ -1,0 +1,93 @@
+class Bool_Events
+	triplet s (init = notActive);
+	Boolean I (reset = false);
+	parameter Integer del = 3;
+	event delayed (delay = Dirac(del));
+
+
+	parameter Real lambda = 0.5;
+	event fault (delay = exponential(lambda));
+transition
+	fault : s == notActive -> s := Failed;
+	delayed : I and not s == Active and not s == Failed -> s := Active;	
+end
+
+
+class PRE_integer
+	Integer current (reset = 0);
+	Integer stored (init = 0);
+	Integer past (reset = 0);
+	event update (delay= Dirac(0));
+transition
+	update : current != stored -> stored := current;
+assertion
+	past := stored;
+
+end
+
+
+
+class TimedSwitch
+    Boolean s (init = true); // Parte rivolto verso il primo input
+    
+    Boolean I (reset = false);
+    Boolean O (reset = false);
+   
+
+    event timeout (delay = Dirac(0));
+
+    Integer t (reset = 0);
+    
+    parameter Integer Delay = 5; // Configurabile
+
+transition
+    // Se il timeout scade senza ricevere True da In1, passa a In2
+    timeout : not I and t >= Delay and s == true -> s := false;
+
+assertion
+    // Aggiorna il tempo della guardia quando si attiva
+	O := if s == true then I	else false;
+end
+
+class PriorityTimedSwitch
+    Boolean waiting (init = true); // Parte rivolto verso il primo input
+	Boolean Select1 (reset = true);
+    
+    Boolean I1 (reset = false);
+    Boolean I2 (reset = false);
+    Boolean O (reset = false);
+    
+    Boolean guard (reset = false);
+    Boolean timerActive (init = true); //if guardactive event re-initiailzated, it has to be changed to false
+	Integer tg (init = 0);
+
+	event guardActive (delay = Dirac(0));
+    event timeout (delay = Dirac(0));
+
+    Integer t (reset = 0);
+    
+    parameter Integer Delay = 4; // Configurabile
+
+transition
+    // Attivazione della guardia, rimosso al momento per semplicità 
+    // guardActive : t == 1 and not timerActive -> {timerActive := true; tg := t;}
+    
+    // Se il timeout scade senza ricevere True da In1, passa a In2
+    // timeout : timerActive and not I1 and t >= tg + Delay + 1 and working == true -> working := false;  //if guardactive event re-initiailzated, it has to be sobstituted
+    timeout : not I1 and t >= Delay and waiting == true -> waiting := false;
+     //t + t_guard >= Timeout
+assertion
+
+	Select1 := if waiting then true else false;
+	O := if Select1 == true then I1 else I2;
+end
+
+class PRE
+	Boolean current, past (reset = false);
+	Boolean stored (init = false);
+	event update (delay = Dirac(0));
+transition
+	update : current != stored -> stored := current;
+assertion
+	past := stored;
+end
