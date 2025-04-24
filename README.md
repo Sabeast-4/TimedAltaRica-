@@ -5,7 +5,7 @@ For the Timed Switch :
 
 For the drone collusion avoidance :
 - AltaRica file for the drone collision avoidance 
-- Sequences generated for TO = 4
-- Sequences generated for TO = 5
-- Trie representation for TO = 4
-- Trie representation for TO = 5
+- Sequences generated for OT = 4
+- Sequences generated for OT = 5
+- Trie representation for OT = 4
+- Trie representation for OT = 5
